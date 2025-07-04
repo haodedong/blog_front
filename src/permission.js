@@ -17,6 +17,12 @@ router.beforeEach(async(to, from, next) => {
   // set page title
   document.title = getPageTitle(to.meta.title)
 
+  // 检查路由是否设置为无需授权访问
+  if (to.meta.noAuth === true) {
+    next()
+    return
+  }
+
   // determine whether the user has logged in
   const hasToken = getToken()
 
