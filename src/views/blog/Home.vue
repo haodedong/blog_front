@@ -40,23 +40,28 @@
         <div class="articles-container">
           <h3 class="section-title">{{ language.sections.latestArticles }}</h3>
 
+          <!-- 加载状态 -->
+          <div v-if="loading" class="loading">
+            <p>{{ language.loading }}</p>
+          </div>
+
           <!-- 紧凑的文章列表 -->
-          <div class="articles-list">
-            <article v-for="(article, index) in articles" :key="index" class="article-item">
+          <div v-else class="articles-list">
+            <article v-for="article in articles" :key="article.id" class="article-item">
               <div class="article-thumbnail">
                 <img :src="article.cover" :alt="article.title">
               </div>
               <div class="article-info">
                 <div class="article-meta">
                   <span class="article-category">{{ article.category }}</span>
-                  <span class="article-date">{{ article.date }}</span>
+                  <span class="article-date">{{ formatDate(article.createTime) }}</span>
                 </div>
                 <h4 class="article-title">
                   <router-link :to="`/blog/article/${article.id}`">{{ article.title }}</router-link>
                 </h4>
                 <p class="article-summary">{{ article.summary }}</p>
                 <router-link :to="`/blog/article/${article.id}`" class="read-more">
-                  {{ language.buttons.readMore }} →
+                  {{ language.buttons.readMore }} <span class="arrow">→</span>
                 </router-link>
               </div>
             </article>
@@ -64,9 +69,21 @@
 
           <!-- 分页 -->
           <div class="pagination">
-            <button class="prev-page">← {{ language.pagination.prev }}</button>
-            <span class="page-number">1 / 5</span>
-            <button class="next-page">{{ language.pagination.next }} →</button>
+            <button
+              class="prev-page"
+              :disabled="currentPage === 1"
+              @click="prevPage"
+            >
+              ← {{ language.pagination.prev }}
+            </button>
+            <span class="page-number">{{ currentPage }} / {{ totalPages }}</span>
+            <button
+              class="next-page"
+              :disabled="currentPage === totalPages"
+              @click="nextPage"
+            >
+              {{ language.pagination.next }} →
+            </button>
           </div>
         </div>
 
@@ -76,19 +93,19 @@
             <h3>{{ language.sidebar.about }}</h3>
             <div class="author-info">
               <div class="author-avatar">
-                <img src="https://via.placeholder.com/60x60/667eea/ffffff?text=Author" alt="作者头像">
+                <img :src="authorAvatarSrc" :alt="authorInfo.name">
               </div>
-              <p class="author-description">{{ language.sidebar.authorDescription }}</p>
+              <p class="author-description">{{ authorInfo.description }}</p>
             </div>
           </div>
 
           <div class="sidebar-module categories">
             <h3>{{ language.sidebar.categories }}</h3>
             <ul class="category-list">
-              <li v-for="(count, category) in categories" :key="category">
-                <router-link :to="`/blog/category/${category}`">
-                  {{ category }}
-                  <span class="category-count">{{ count }}</span>
+              <li v-for="category in categories" :key="category.id">
+                <router-link :to="`/blog/category/${category.id}`">
+                  {{ category.name }}
+                  <span class="category-count">{{ category.count || 0 }}</span>
                 </router-link>
               </li>
             </ul>
@@ -98,12 +115,12 @@
             <h3>{{ language.sidebar.tags }}</h3>
             <div class="tag-cloud">
               <router-link
-                v-for="(count, tag) in tags"
-                :key="tag"
-                :to="`/blog/tag/${tag}`"
+                v-for="tag in tags"
+                :key="tag.id"
+                :to="`/blog/tag/${tag.id}`"
                 class="tag-item"
               >
-                {{ tag }}
+                {{ tag.name }}
               </router-link>
             </div>
           </div>
@@ -126,76 +143,30 @@
 </template>
 
 <script>
+import { getArticles, getCategories, getTags, getAuthorInfo } from '@/api/blog'
+
 export default {
   name: 'BlogHome',
   data() {
     return {
       currentLang: 'zh',
-      articles: [
-        {
-          id: 1,
-          title: '如何提高Vue项目性能',
-          cover: 'https://via.placeholder.com/120x80/667eea/ffffff?text=Vue',
-          date: '2023-06-15',
-          category: '前端开发',
-          summary: 'Vue项目性能优化的几种常见方法，包括懒加载、组件缓存、虚拟滚动等技术的实践应用。'
-        },
-        {
-          id: 2,
-          title: 'JavaScript ES6+新特性详解',
-          cover: 'https://via.placeholder.com/120x80/764ba2/ffffff?text=JS',
-          date: '2023-06-10',
-          category: 'JavaScript',
-          summary: '深入了解ES6+的新特性，包括箭头函数、解构赋值、Promise、async/await等现代JavaScript语法。'
-        },
-        {
-          id: 3,
-          title: 'CSS Grid布局完全指南',
-          cover: 'https://via.placeholder.com/120x80/f093fb/ffffff?text=CSS',
-          date: '2023-06-08',
-          category: 'CSS',
-          summary: 'CSS Grid是现代网页布局的强大工具，本文将详细介绍Grid布局的各种属性和实用技巧。'
-        },
-        {
-          id: 4,
-          title: 'React Hooks最佳实践',
-          cover: 'https://via.placeholder.com/120x80/4facfe/ffffff?text=React',
-          date: '2023-06-05',
-          category: 'React',
-          summary: 'React Hooks改变了我们编写React组件的方式，了解如何正确使用Hooks来提高代码质量。'
-        },
-        {
-          id: 5,
-          title: 'Node.js后端开发入门',
-          cover: 'https://via.placeholder.com/120x80/43e97b/ffffff?text=Node',
-          date: '2023-06-01',
-          category: '后端开发',
-          summary: '从零开始学习Node.js后端开发，包括Express框架、数据库操作、API设计等核心知识。'
-        }
-      ],
-      categories: {
-        '前端开发': 12,
-        'JavaScript': 8,
-        'CSS': 6,
-        'Vue': 9,
-        'React': 5,
-        '后端开发': 4
+      loading: false,
+      articles: [],
+      categories: [],
+      tags: [],
+      authorInfo: {
+        name: '',
+        avatar: '',
+        description: ''
       },
-      tags: {
-        'Vue': 15,
-        'JavaScript': 20,
-        'CSS': 8,
-        'HTML': 6,
-        'webpack': 4,
-        'Node.js': 7,
-        'React': 6,
-        'TypeScript': 10,
-        'HTTP': 3,
-        'Git': 5
-      },
+      currentPage: 1,
+      pageSize: 10,
+      totalPages: 1,
+      totalCount: 0,
       blogLanguage: {
         zh: {
           title: '我的博客',
+          loading: '加载中...',
           nav: {
             home: '首页',
             articles: '文章',
@@ -204,8 +175,8 @@ export default {
             about: '关于'
           },
           banner: {
-            welcome: '欢迎来到我的博客',
-            slogan: '分享技术，记录成长'
+            welcome: '欢迎来到我的技术博客',
+            slogan: '分享前端技术，记录学习心得'
           },
           sections: {
             latestArticles: '最新文章'
@@ -213,11 +184,10 @@ export default {
           sidebar: {
             about: '关于作者',
             categories: '文章分类',
-            tags: '标签云',
-            authorDescription: '全栈开发者，热爱技术分享，专注于前端和后端技术研究。'
+            tags: '标签云'
           },
           buttons: {
-            readMore: '阅读更多'
+            readMore: '阅读全文'
           },
           pagination: {
             prev: '上一页',
@@ -229,6 +199,7 @@ export default {
         },
         'zh-tw': {
           title: '我的博客',
+          loading: '加載中...',
           nav: {
             home: '首頁',
             articles: '文章',
@@ -237,8 +208,8 @@ export default {
             about: '關於'
           },
           banner: {
-            welcome: '歡迎來到我的博客',
-            slogan: '分享技術，記錄成長'
+            welcome: '歡迎來到我的技術博客',
+            slogan: '分享前端技術，記錄學習心得'
           },
           sections: {
             latestArticles: '最新文章'
@@ -246,11 +217,10 @@ export default {
           sidebar: {
             about: '關於作者',
             categories: '文章分類',
-            tags: '標籤雲',
-            authorDescription: '全棧開發者，熱愛技術分享，專注於前端和後端技術研究。'
+            tags: '標籤雲'
           },
           buttons: {
-            readMore: '閱讀更多'
+            readMore: '閱讀全文'
           },
           pagination: {
             prev: '上一頁',
@@ -262,6 +232,7 @@ export default {
         },
         en: {
           title: 'My Blog',
+          loading: 'Loading...',
           nav: {
             home: 'Home',
             articles: 'Articles',
@@ -270,8 +241,8 @@ export default {
             about: 'About'
           },
           banner: {
-            welcome: 'Welcome to My Blog',
-            slogan: 'Share Technology, Record Growth'
+            welcome: 'Welcome to My Tech Blog',
+            slogan: 'Share frontend technology, record learning insights'
           },
           sections: {
             latestArticles: 'Latest Articles'
@@ -279,8 +250,7 @@ export default {
           sidebar: {
             about: 'About Author',
             categories: 'Categories',
-            tags: 'Tag Cloud',
-            authorDescription: 'Full-stack developer, passionate about technology sharing, focused on frontend and backend technology research.'
+            tags: 'Tag Cloud'
           },
           buttons: {
             readMore: 'Read More'
@@ -290,7 +260,7 @@ export default {
             next: 'Next'
           },
           footer: {
-            copyright: 'All Rights Reserved'
+            copyright: 'Copyright'
           }
         }
       }
@@ -299,11 +269,90 @@ export default {
   computed: {
     language() {
       return this.blogLanguage[this.currentLang] || this.blogLanguage.zh
+    },
+    authorAvatarSrc() {
+      // 检查是否有头像数据
+      if (!this.authorInfo.avatar) {
+        return '/default-avatar.png' // 默认头像
+      }
+
+      // 如果已经是完整的 data URL，直接返回
+      if (this.authorInfo.avatar.startsWith('data:')) {
+        return this.authorInfo.avatar
+      }
+
+      // 如果是 base64 字符串，添加 data URL 前缀
+      return `data:image/jpeg;base64,${this.authorInfo.avatar}`
     }
   },
+  async mounted() {
+    await this.loadData()
+  },
   methods: {
-    changeLang(event) {
+    async loadData() {
+      this.loading = true
+      try {
+        // 并发加载所有数据
+        const [, categoriesRes, tagsRes, authorRes] = await Promise.all([
+          this.loadArticles(),
+          getCategories(),
+          getTags(),
+          getAuthorInfo()
+        ])
+
+        this.categories = Array.isArray(categoriesRes.data) ? categoriesRes.data : []
+        this.tags = Array.isArray(tagsRes.data) ? tagsRes.data : []
+        this.authorInfo = authorRes.data || this.authorInfo
+      } catch (error) {
+        console.error('加载数据失败:', error)
+        if (this.$message) {
+          this.$message.error('加载数据失败，请刷新页面重试')
+        }
+      } finally {
+        this.loading = false
+      }
+    },
+    async loadArticles() {
+      try {
+        const params = {
+          page: this.currentPage,
+          size: this.pageSize
+        }
+        const response = await getArticles(params)
+
+        if (response.data) {
+          this.articles = response.data.list || []
+          this.totalCount = response.data.total || 0
+          this.totalPages = response.data.totalPages || 1
+        }
+
+        return response
+      } catch (error) {
+        console.error('加载文章失败:', error)
+        throw error
+      }
+    },
+    async changeLang(event) {
       this.currentLang = event.target.value
+      // 重新加载文章（其他数据不需要重新加载）
+      await this.loadArticles()
+    },
+    async prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--
+        await this.loadArticles()
+      }
+    },
+    async nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++
+        await this.loadArticles()
+      }
+    },
+    formatDate(dateString) {
+      if (!dateString) return ''
+      const date = new Date(dateString)
+      return date.toLocaleDateString(this.currentLang === 'en' ? 'en-US' : 'zh-CN')
     }
   }
 }
@@ -318,7 +367,25 @@ export default {
   background: #f8f9fa;
 }
 
-/* 头部样式 */
+/* 加载状态样式 */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+/* 禁用按钮样式 */
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination button:disabled:hover {
+  background: #ccc;
+  transform: none;
+}
+
+/* 其他样式保持不变 */
 .blog-header {
   background: white;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -374,7 +441,6 @@ export default {
   cursor: pointer;
 }
 
-/* 主要内容区样式 */
 .blog-main {
   max-width: 1200px;
   margin: 0 auto;
@@ -416,7 +482,6 @@ export default {
   padding-bottom: 10px;
 }
 
-/* 紧凑的文章列表样式 */
 .articles-list {
   display: flex;
   flex-direction: column;
@@ -518,7 +583,10 @@ export default {
   color: #764ba2;
 }
 
-/* 分页样式 */
+.arrow {
+  margin-left: 4px;
+}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -535,11 +603,12 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-.pagination button:hover {
+.pagination button:hover:not(:disabled) {
   background: #764ba2;
+  transform: translateY(-1px);
 }
 
 .page-number {
@@ -551,7 +620,6 @@ export default {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* 侧边栏样式 */
 .blog-sidebar {
   position: sticky;
   top: 100px;
@@ -581,13 +649,13 @@ export default {
 }
 
 .author-avatar {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
-  margin-bottom: 10px;
+  margin: 0 auto 10px;
   overflow: hidden;
   border: 2px solid #e1e8ed;
-  display: inline-block;
+  display: block;
 }
 
 .author-avatar img {
@@ -599,6 +667,7 @@ export default {
 .author-description {
   color: #4a5568;
   font-size: 14px;
+  margin: 0;
 }
 
 .category-list {
@@ -659,7 +728,6 @@ export default {
   color: white;
 }
 
-/* 页脚样式 */
 .blog-footer {
   background: white;
   padding: 30px 20px;
@@ -703,7 +771,6 @@ export default {
   background: #764ba2;
 }
 
-/* 响应式设计 */
 @media (max-width: 768px) {
   .content-wrapper {
     grid-template-columns: 1fr;

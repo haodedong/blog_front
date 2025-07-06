@@ -36,7 +36,16 @@ module.exports = {
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '' // 移除 /api 前缀
+        }
+      }
+    },
+    // before: require('./mock/mock-server.js')
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
@@ -46,7 +55,8 @@ module.exports = {
       alias: {
         '@': resolve('src')
       }
-    }
+    },
+    devtool: 'source-map' // 启用 source map 断点调试
   },
   chainWebpack(config) {
     // it can improve the speed of the first screen, it is recommended to turn on preload
