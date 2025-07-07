@@ -292,7 +292,6 @@ export default {
     async loadData() {
       this.loading = true
       try {
-        // 并发加载所有数据
         const [, categoriesRes, tagsRes, authorRes] = await Promise.all([
           this.loadArticles(),
           getCategories(),
@@ -334,7 +333,6 @@ export default {
     },
     async changeLang(event) {
       this.currentLang = event.target.value
-      // 重新加载文章（其他数据不需要重新加载）
       await this.loadArticles()
     },
     async prevPage() {
@@ -370,7 +368,7 @@ export default {
 /* 加载状态样式 */
 .loading {
   text-align: center;
-  padding: 40px;
+  padding: 3rem;
   color: #666;
 }
 
@@ -385,27 +383,27 @@ export default {
   transform: none;
 }
 
-/* 其他样式保持不变 */
+/* 顶部导航栏 */
 .blog-header {
   background: white;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
 }
 
 .header-container {
-  max-width: 1200px;
+  max-width: 75rem;
   margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 20px;
+  padding: 1rem 1.5rem;
 }
 
 .logo h1 {
   margin: 0;
-  font-size: 24px;
+  font-size: 1.5rem;
   color: #2c3e50;
   font-weight: 700;
 }
@@ -415,10 +413,7 @@ export default {
   list-style: none;
   padding: 0;
   margin: 0;
-}
-
-.main-nav li {
-  margin: 0 15px;
+  gap: 1rem;
 }
 
 .main-nav a {
@@ -426,86 +421,91 @@ export default {
   color: #2c3e50;
   font-weight: 500;
   transition: color 0.3s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
 }
 
 .main-nav a:hover {
   color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
 }
 
 .language-switcher select {
-  padding: 6px 10px;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #e1e8ed;
-  border-radius: 4px;
+  border-radius: 0.25rem;
   background: white;
   color: #2c3e50;
   cursor: pointer;
+  font-size: 0.875rem;
 }
 
+/* 主要内容区 */
 .blog-main {
-  max-width: 1200px;
+  max-width: 75rem;
   margin: 0 auto;
-  padding: 20px;
+  padding: 1.5rem;
 }
 
 .blog-banner {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  padding: 40px;
-  border-radius: 8px;
+  padding: 3rem 2rem;
+  border-radius: 0.5rem;
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 2rem;
 }
 
 .banner-content h2 {
-  font-size: 32px;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 0.75rem;
 }
 
 .banner-content p {
-  font-size: 16px;
+  font-size: clamp(0.875rem, 2vw, 1rem);
   opacity: 0.9;
 }
 
 .content-wrapper {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: 30px;
+  gap: 2rem;
 }
 
 .section-title {
-  font-size: 24px;
+  font-size: clamp(1.25rem, 3vw, 1.5rem);
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
   color: #2c3e50;
   border-bottom: 2px solid #667eea;
-  padding-bottom: 10px;
+  padding-bottom: 0.75rem;
 }
 
 .articles-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 1.5rem;
 }
 
 .article-item {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   display: flex;
-  min-height: 120px;
+  min-height: 8rem;
 }
 
 .article-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-0.125rem);
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 .article-thumbnail {
-  width: 120px;
-  height: 120px;
+  width: 8rem;
+  height: 8rem;
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -517,7 +517,7 @@ export default {
 }
 
 .article-info {
-  padding: 20px;
+  padding: 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -525,16 +525,16 @@ export default {
 
 .article-meta {
   display: flex;
-  gap: 15px;
-  margin-bottom: 8px;
-  font-size: 12px;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
 }
 
 .article-category {
   background: #667eea;
   color: white;
-  padding: 2px 8px;
-  border-radius: 12px;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.75rem;
   font-weight: 500;
 }
 
@@ -543,8 +543,8 @@ export default {
 }
 
 .article-title {
-  margin: 0 0 10px 0;
-  font-size: 18px;
+  margin: 0 0 0.75rem 0;
+  font-size: clamp(1rem, 2.5vw, 1.125rem);
   font-weight: 600;
   line-height: 1.4;
 }
@@ -561,8 +561,8 @@ export default {
 
 .article-summary {
   color: #4a5568;
-  font-size: 14px;
-  margin-bottom: 12px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
   flex: 1;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -573,7 +573,7 @@ export default {
 .read-more {
   color: #667eea;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   align-self: flex-start;
   transition: color 0.3s ease;
@@ -584,64 +584,69 @@ export default {
 }
 
 .arrow {
-  margin-left: 4px;
+  margin-left: 0.25rem;
 }
 
+/* 分页 */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-top: 30px;
-  gap: 15px;
+  margin-top: 2rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .pagination button {
   background: #667eea;
   color: white;
   border: none;
-  padding: 8px 16px;
-  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  border-radius: 0.25rem;
   cursor: pointer;
   font-weight: 500;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
 }
 
 .pagination button:hover:not(:disabled) {
   background: #764ba2;
-  transform: translateY(-1px);
+  transform: translateY(-0.0625rem);
 }
 
 .page-number {
   font-weight: 600;
   color: #2c3e50;
-  padding: 8px 16px;
+  padding: 0.5rem 1rem;
   background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 0.25rem;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.1);
+  font-size: 0.875rem;
 }
 
+/* 侧边栏 */
 .blog-sidebar {
   position: sticky;
-  top: 100px;
+  top: 7rem;
   align-self: start;
 }
 
 .sidebar-module {
   background: white;
-  border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-module h3 {
   margin-top: 0;
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
   color: #2c3e50;
-  font-size: 16px;
+  font-size: 1rem;
   font-weight: 700;
   border-bottom: 2px solid #667eea;
-  padding-bottom: 8px;
+  padding-bottom: 0.5rem;
 }
 
 .author-info {
@@ -649,10 +654,10 @@ export default {
 }
 
 .author-avatar {
-  width: 80px;
-  height: 80px;
+  width: 5rem;
+  height: 5rem;
   border-radius: 50%;
-  margin: 0 auto 10px;
+  margin: 0 auto 0.75rem;
   overflow: hidden;
   border: 2px solid #e1e8ed;
   display: block;
@@ -666,8 +671,9 @@ export default {
 
 .author-description {
   color: #4a5568;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin: 0;
+  line-height: 1.5;
 }
 
 .category-list {
@@ -677,7 +683,7 @@ export default {
 }
 
 .category-list li {
-  margin-bottom: 8px;
+  margin-bottom: 0.5rem;
 }
 
 .category-list a {
@@ -686,10 +692,10 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 10px;
-  border-radius: 4px;
-  transition: background 0.3s ease;
-  font-size: 14px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.25rem;
+  transition: all 0.3s ease;
+  font-size: 0.875rem;
 }
 
 .category-list a:hover {
@@ -700,25 +706,25 @@ export default {
 .category-count {
   background: #e1e8ed;
   color: #2c3e50;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 12px;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.625rem;
+  font-size: 0.75rem;
   font-weight: 500;
 }
 
 .tag-cloud {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 0.5rem;
 }
 
 .tag-item {
   text-decoration: none;
   color: #667eea;
   background: #f7fafc;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 12px;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.75rem;
+  font-size: 0.75rem;
   font-weight: 500;
   transition: all 0.3s ease;
 }
@@ -728,52 +734,57 @@ export default {
   color: white;
 }
 
+/* 页脚 */
 .blog-footer {
   background: white;
-  padding: 30px 20px;
+  padding: 2rem 1.5rem;
   text-align: center;
-  margin-top: 40px;
+  margin-top: 3rem;
   border-top: 1px solid #e1e8ed;
 }
 
 .footer-content {
-  max-width: 1200px;
+  max-width: 75rem;
   margin: 0 auto;
 }
 
 .footer-content p {
-  margin-bottom: 15px;
+  margin-bottom: 1rem;
   color: #4a5568;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .social-links {
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .social-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 2rem;
+  height: 2rem;
   background: #667eea;
   color: white;
   border-radius: 50%;
   text-decoration: none;
-  font-size: 14px;
-  transition: background 0.3s ease;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
 }
 
 .social-link:hover {
   background: #764ba2;
+  transform: translateY(-0.0625rem);
 }
 
+/* 响应式设计 */
 @media (max-width: 768px) {
   .content-wrapper {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
   }
 
   .article-item {
@@ -783,25 +794,58 @@ export default {
 
   .article-thumbnail {
     width: 100%;
-    height: 180px;
-  }
-
-  .banner-content h2 {
-    font-size: 24px;
+    height: 12rem;
   }
 
   .header-container {
     flex-direction: column;
-    gap: 15px;
+    gap: 1rem;
   }
 
   .main-nav ul {
     flex-wrap: wrap;
     justify-content: center;
+    gap: 0.5rem;
   }
 
-  .main-nav li {
-    margin: 5px 10px;
+  .blog-main {
+    padding: 1rem;
+  }
+
+  .blog-banner {
+    padding: 2rem 1rem;
+  }
+
+  .sidebar-module {
+    padding: 1rem;
+  }
+
+  .blog-footer {
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .pagination {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .pagination button {
+    width: 100%;
+    max-width: 12rem;
+  }
+
+  .article-info {
+    padding: 1rem;
+  }
+
+  .tag-cloud {
+    gap: 0.25rem;
+  }
+
+  .social-links {
+    gap: 0.5rem;
   }
 }
 </style>
