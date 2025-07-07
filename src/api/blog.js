@@ -12,8 +12,24 @@ export function getArticles(params) {
 // 获取文章详情
 export function getArticleDetail(id) {
   return request({
-    url: `/api/blog/articles/${id}`,
+    url: `/api/blog/article/${id}`,
     method: 'get'
+  })
+}
+
+// 获取相关文章
+export function getRelatedArticles(id) {
+  return request({
+    url: `/api/blog/article/${id}/related`,
+    method: 'get'
+  })
+}
+
+// 切换文章点赞状态
+export function toggleArticleLike(id) {
+  return request({
+    url: `/api/blog/article/${id}/like`,
+    method: 'post'
   })
 }
 

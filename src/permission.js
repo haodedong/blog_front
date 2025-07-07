@@ -8,7 +8,7 @@ import getPageTitle from '@/utils/get-page-title'
 
 NProgress.configure({ showSpinner: false }) // NProgress Configuration
 
-const whiteList = ['/login', '/auth-redirect'] // no redirect whitelist
+const whiteList = ['/login', '/auth-redirect', '/404'] // no redirect whitelist
 
 router.beforeEach(async(to, from, next) => {
   // start progress bar
@@ -19,6 +19,12 @@ router.beforeEach(async(to, from, next) => {
 
   // 检查路由是否设置为无需授权访问
   if (to.meta.noAuth === true) {
+    next()
+    return
+  }
+
+  // 如果是404页面，直接放行
+  if (to.name === 'NotFound' || to.name === 'Page404') {
     next()
     return
   }
